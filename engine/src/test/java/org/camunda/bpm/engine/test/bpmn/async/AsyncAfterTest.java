@@ -53,6 +53,25 @@ import org.junit.Test;
 public class AsyncAfterTest extends PluggableProcessEngineTest {
 
   @Test
+  @Deployment(resources = {"org/camunda/bpm/engine/test/bpmn/async/Simplified_working.bpmn20.xml", "org/camunda/bpm/engine/test/bpmn/async/Simplified_Not_Working.bpmn20.xml"})
+  public void shouldDemonstrateBug() {
+
+    runtimeService.startProcessInstanceByKey("Simplified_Working");
+    runtimeService.startProcessInstanceByKey("Simplified_Not_Working");
+
+
+    List<Job> list = managementService.createJobQuery().list();
+    testRule.waitForJobExecutorToProcessAllJobs(TimeUnit.MILLISECONDS.convert(5L, TimeUnit.SECONDS));
+
+    List<Task> parentProcessTasks = taskService.createTaskQuery().taskName("parentProcessTask").list();
+    List<Task> subProcessTasks = taskService.createTaskQuery().taskName("subProcessTask").list();
+
+
+    assertThat(parentProcessTasks).hasSize(2);
+    assertThat(subProcessTasks).hasSize(2);
+  }
+
+  @Test
   public void testTransitionIdRequired() {
 
     // if an outgoing sequence flow has no id, we cannot use it in asyncAfter
@@ -141,7 +160,7 @@ public class AsyncAfterTest extends PluggableProcessEngineTest {
   public void testAsyncAfterServiceTaskMultipleTransitions() {
 
     // start process instance
-    Map<String, Object> varMap = new HashMap<String, Object>();
+    Map<String, Object> varMap = new HashMap<>();
     varMap.put("flowToTake", "flow2");
     ProcessInstance pi = runtimeService.startProcessInstanceByKey("testProcess", varMap);
 
@@ -166,7 +185,7 @@ public class AsyncAfterTest extends PluggableProcessEngineTest {
     //////////////////////////////////////////////////////////////
 
     // start process instance
-    varMap = new HashMap<String, Object>();
+    varMap = new HashMap<>();
     varMap.put("flowToTake", "flow3");
     pi = runtimeService.startProcessInstanceByKey("testProcess", varMap);
 
@@ -192,7 +211,7 @@ public class AsyncAfterTest extends PluggableProcessEngineTest {
   public void testAsyncAfterServiceTaskMultipleTransitionsConcurrent() {
 
     // start process instance
-    Map<String, Object> varMap = new HashMap<String, Object>();
+    Map<String, Object> varMap = new HashMap<>();
     ProcessInstance pi = runtimeService.startProcessInstanceByKey("testProcess", varMap);
 
     // the service task is completely invoked
@@ -473,7 +492,7 @@ public class AsyncAfterTest extends PluggableProcessEngineTest {
   @Test
   public void testAsyncAfterExclusiveGateway() {
     // start process instance with variables
-    Map<String, Object> variables = new HashMap<String, Object>();
+    Map<String, Object> variables = new HashMap<>();
     variables.put("flow", false);
 
     ProcessInstance pi = runtimeService.startProcessInstanceByKey("testExclusiveGateway", variables);
@@ -504,7 +523,7 @@ public class AsyncAfterTest extends PluggableProcessEngineTest {
   @Test
   public void testAsyncAfterAndBeforeExclusiveGateway() {
     // start process instance with variables
-    Map<String, Object> variables = new HashMap<String, Object>();
+    Map<String, Object> variables = new HashMap<>();
     variables.put("flow", false);
 
     ProcessInstance pi = runtimeService.startProcessInstanceByKey("testExclusiveGateway", variables);
