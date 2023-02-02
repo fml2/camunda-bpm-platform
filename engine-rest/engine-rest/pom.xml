@@ -64,6 +64,12 @@
       <artifactId>jboss-servlet-api_3.0_spec</artifactId>
       <scope>provided</scope>
     </dependency>
+    <dependency>
+      <groupId>jakarta.servlet</groupId>
+      <artifactId>jakarta.servlet-api</artifactId>
+      <version>6.0.0</version>
+      <scope>provided</scope>
+    </dependency>
 
     <dependency>
       <groupId>org.camunda.bpm</groupId>
@@ -271,6 +277,26 @@
               <goal>test-jar</goal>
             </goals>
           </execution>
+          <execution>
+            <id>jar-jakarta</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+            <configuration>
+              <classesDirectory>${project.build.directory}/classes-jakarta</classesDirectory>
+              <classifier>jakarta</classifier>
+            </configuration>
+          </execution>
+          <execution>
+            <id>test-jar-jakarta</id>
+            <goals>
+              <goal>jar</goal><!--TODO update plugin version-->
+            </goals>
+            <configuration>
+              <classesDirectory>${project.build.directory}/test-classes-jakarta</classesDirectory>
+              <classifier>jakarta-tests</classifier>
+            </configuration>
+          </execution>
         </executions>
       </plugin>
 
@@ -306,26 +332,103 @@
       </plugin>
 
       <plugin>
+        <artifactId>maven-resources-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>copy-classes</id>
+            <phase>process-test-classes</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${basedir}/target/classes-jakarta</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>${basedir}/target/classes</directory>
+                  <filtering>false</filtering>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+          <execution>
+            <id>copy-test-classes</id>
+            <phase>process-test-classes</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${basedir}/target/test-classes-jakarta</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>${basedir}/target/test-classes</directory>
+                  <filtering>false</filtering>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>delete-javax-jakarta</id>
+            <phase>process-test-classes</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <delete>
+                  <fileset dir="target/classes/org/camunda/bpm/engine/rest/filter" includes="JakartaEmptyBodyFilter*.class"/>
+                  <fileset dir="target/classes-jakarta/org/camunda/bpm/engine/rest/filter" includes="EmptyBodyFilter*.class"/>
+                </delete>
+              </target>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
         <groupId>org.eclipse.transformer</groupId>
         <artifactId>transformer-maven-plugin</artifactId>
         <version>0.5.0</version>
         <configuration>
           <rules>
             <jakartaDefaults>true</jakartaDefaults>
+            <renames>
+              <rename>${basedir}/transform-renames.properties</rename>
+            </renames>
           </rules>
           <classifier>jakarta</classifier>
-          <artifact>
-            <groupId>org.camunda.bpm</groupId>
-            <artifactId>camunda-engine-rest-core</artifactId>
-            <version>${project.version}</version>
-          </artifact>
         </configuration>
         <executions>
           <execution>
-            <id>transform-jar</id>
+            <id>transform-classes</id>
+            <phase>process-test-classes</phase>
             <goals>
-              <goal>jar</goal>
+              <goal>transform</goal>
             </goals>
+            <configuration>
+              <transformDirectory>${project.build.directory}/classes-jakarta</transformDirectory>
+              <rules>
+                <jakartaDefaults>true</jakartaDefaults>
+                <renames>
+                  <rename>${basedir}/transform-renames.properties</rename>
+                </renames>
+              </rules>
+            </configuration>
+          </execution>
+          <execution>
+            <id>transform-test-classes</id>
+            <phase>process-test-classes</phase>
+            <goals>
+              <goal>transform</goal>
+            </goals>
+            <configuration>
+              <transformDirectory>${project.build.directory}/test-classes-jakarta</transformDirectory>
+            </configuration>
           </execution>
         </executions>
       </plugin>
@@ -514,6 +617,19 @@
                     <include>**/ProcessDefinitionRestServiceInteractionTest.java</include>
                     <include>**/TaskRestServiceInteractionTest.java</include>
                   </includes>
+                </configuration>
+              </execution>
+              <execution>
+                <id>test-jakarta</id>
+                <phase>test</phase>
+                <goals>
+                  <goal>test</goal>
+                </goals>
+                <configuration>
+                  <skip>true</skip><!--TODO skip-->
+                  <classesDirectory>${project.build.directory}/classes-jakarta</classesDirectory>
+                  <testClassesDirectory>${project.build.directory}/test-classes-jakarta</testClassesDirectory>
+                  <reportsDirectory>${project.build.directory}/surefire-reports-jakarta</reportsDirectory>
                 </configuration>
               </execution>
             </executions>
