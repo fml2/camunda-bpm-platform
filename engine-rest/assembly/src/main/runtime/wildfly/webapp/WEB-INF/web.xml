@@ -15,16 +15,12 @@
 
   <!-- rest bootstrap listener -->
   <listener>
-    <listener-class>org.camunda.bpm.engine.rest.impl.web.bootstrap.RestContainerBootstrap</listener-class>
-  </listener>
-
-  <listener>
-    <listener-class>org.camunda.bpm.engine.rest.impl.FetchAndLockContextListener</listener-class>
+    <listener-class>org.camunda.bpm.engine.rest.jakarta.impl.web.bootstrap.RestContainerBootstrap</listener-class>
   </listener>
 
   <filter>
     <filter-name>EmptyBodyFilter</filter-name>
-    <filter-class>org.camunda.bpm.engine.rest.filter.EmptyBodyFilter</filter-class>
+    <filter-class>org.camunda.bpm.engine.rest.jakarta.filter.EmptyBodyFilter</filter-class>
     <async-supported>true</async-supported>
   </filter>
   <filter-mapping>
@@ -34,7 +30,7 @@
 
   <filter>
     <filter-name>CacheControlFilter</filter-name>
-    <filter-class>org.camunda.bpm.engine.rest.filter.CacheControlFilter</filter-class>
+    <filter-class>org.camunda.bpm.engine.rest.jakarta.filter.CacheControlFilter</filter-class>
     <async-supported>true</async-supported>
   </filter>
   <filter-mapping>
